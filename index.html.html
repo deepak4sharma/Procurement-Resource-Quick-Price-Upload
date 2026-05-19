@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurement Resource * Quick Price Upload</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg:       #f5f2ec;
+  --surface:  #fffef9;
+  --surface2: #eeeae0;
+  --ink:      #1a1610;
+  --ink2:     #6b6355;
+  --ink3:     #a09880;
+  --accent:   #c8390a;
+  --accent2:  #2855a0;
+  --green:    #3a7d44;
+  --gold:     #d4a820;
+  --border:   #d8d2c4;
+  --r: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  padding-bottom: 60px;
+}
+
+/* ─────────── MASTHEAD ─────────── */
+.masthead {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 22px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  border-bottom: 4px solid var(--accent);
+}
+.masthead-left { display: flex; align-items: center; gap: 18px; }
+.masthead-mark {
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.masthead h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(22px, 4vw, 32px);
+  letter-spacing: 2.5px;
+  line-height: 1;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.masthead h1 .star { color: var(--gold); margin: 0 4px; }
+.masthead-tagline {
+  font-size: 11px;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+}
+.masthead-tagline .by { color: var(--gold); font-weight: 600; }
+.masthead-meta {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink3);
+  line-height: 1.7;
+  letter-spacing: 1px;
+}
+@media (max-width: 600px) {
+  .masthead { padding: 18px 20px; }
+  .masthead h1 { font-size: 20px; letter-spacing: 1.5px; }
+  .masthead-meta { display: none; }
+}
+
+/* ─────────── LAYOUT ─────────── */
+.wrap { max-width: 980px; margin: 0 auto; padding: 26px 16px 0; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px 26px;
+  margin-bottom: 18px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--ink);
+}
+.section-head .num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.section-head h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 400;
+  line-height: 1.1;
+}
+.section-head .sub {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.field { margin-bottom: 12px; }
+.field label {
+  display: block;
+  font-size: 11px;
+  color: var(--ink2);
+  margin-bottom: 5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+input[type="text"], input[type="file"], textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--ink);
+}
+textarea {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  resize: vertical;
+  min-height: 180px;
+}
+input[type="file"] { padding: 6px; cursor: pointer; }
+input:focus, textarea:focus { outline: 2px solid var(--accent2); outline-offset: -1px; }
+
+.hint {
+  font-size: 11.5px;
+  color: var(--ink3);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+button.primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+}
+button.primary:hover { filter: brightness(1.1); }
+button.secondary {
+  background: transparent;
+  color: var(--ink2);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-family: inherit;
+}
+button.secondary:hover { background: var(--surface2); border-color: var(--accent2); color: var(--accent2); }
+
+/* ─────────── REFERENCE STATUS BANNER ─────────── */
+.ref-banner {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ref-banner.warn { border-left-color: var(--gold); }
+.ref-banner.err { border-left-color: var(--accent); }
+.ref-banner-text {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--ink2);
+}
+.ref-banner-text b {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink);
+}
+.ref-banner-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Toggle */
+.upload-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  padding: 4px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  width: fit-content;
+  border: 1px solid var(--border);
+}
+.upload-toggle button {
+  border: none;
+  background: transparent;
+  padding: 7px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--ink3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-family: inherit;
+}
+.upload-toggle button.active {
+  background: var(--ink);
+  color: var(--gold);
+}
+
+.ref-uploaders {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 700px) { .ref-uploaders { grid-template-columns: 1fr; } }
+.ref-uploader-status { font-size: 11px; margin-top: 4px; }
+.ref-uploader-status.ok { color: var(--green); }
+.ref-uploader-status.err { color: var(--accent); }
+
+/* ─────────── SEARCHABLE DROPDOWN ─────────── */
+.combo {
+  position: relative;
+}
+.combo-input-wrap {
+  position: relative;
+}
+.combo-input-wrap .id-tag {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--green);
+  background: #e8f5e9;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.combo-input-wrap .id-tag.missing {
+  color: var(--accent);
+  background: #fee2e2;
+}
+.combo-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 30;
+  margin-top: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: none;
+}
+.combo-list.show { display: block; }
+.combo-list-item {
+  padding: 7px 10px;
+  font-size: 12.5px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--surface2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.combo-list-item:last-child { border-bottom: none; }
+.combo-list-item:hover, .combo-list-item.active { background: var(--surface2); }
+.combo-list-item .name { color: var(--ink); }
+.combo-list-item .id-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--ink3);
+  background: var(--surface2);
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.combo-list-item.active .id-pill { background: #fff; }
+.combo-list-empty {
+  padding: 14px;
+  text-align: center;
+  color: var(--ink3);
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* Row layout for the 3 dropdowns */
+.row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 720px) { .row-3 { grid-template-columns: 1fr; } }
+
+/* ─────────── PASTE EXAMPLE ─────────── */
+.example-block {
+  background: var(--surface2);
+  border: 1px dashed var(--border);
+  border-radius: 5px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 11.5px;
+  color: var(--ink2);
+}
+.example-block code {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 10px;
+  margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+#parseStatus { font-size: 12px; margin-top: 6px; min-height: 18px; }
+
+/* ─────────── RESULTS TABLE ─────────── */
+.preview-wrap {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  margin-top: 12px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+th {
+  background: var(--surface2);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  position: sticky;
+  top: 0;
+}
+td { font-family: 'JetBrains Mono', monospace; color: var(--ink2); }
+
+.actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.actions button.primary { padding: 11px 18px; }
+
+.summary-row {
+  display: flex;
+  gap: 14px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+.summary-pill {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+.summary-pill b { color: var(--gold); }
+
+.alert {
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-size: 12.5px;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+.alert.warn { background: #fef3c7; color: #6e4c1f; border-left: 3px solid var(--gold); }
+.alert.err  { background: #fee2e2; color: #991b1b; border-left: 3px solid var(--accent); }
+.alert.ok   { background: #d1fae5; color: #065f46; border-left: 3px solid var(--green); }
+
+/* ─────────── FOOTER ─────────── */
+.footer {
+  text-align: center;
+  color: var(--ink3);
+  font-size: 11px;
+  margin-top: 30px;
+  letter-spacing: 0.4px;
+}
+.footer .privacy {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: 4px;
+}
+</style>
+</head>
+<body>
+
+<!-- ─────────── MASTHEAD ─────────── -->
+<header class="masthead">
+  <div class="masthead-left">
+    <div class="masthead-mark">QPU</div>
+    <div>
+      <h1>PROCUREMENT RESOURCE <span class="star">*</span> QUICK PRICE UPLOAD</h1>
+      <div class="masthead-tagline">Designed by <span class="by">Deepak Sharma</span> · Built with AI</div>
+    </div>
+  </div>
+  <div class="masthead-meta">
+    <div>SINGLE PRODUCT · PASTE-BASED</div>
+    <div>RUNS 100% IN-BROWSER</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ═════════ REFERENCE DATA (Step 1) ═════════ -->
+  <div class="card">
+    <div class="section-head">
+      <span class="num">01</span>
+      <h2>Reference Data</h2>
+      <span class="sub">Saved in your browser</span>
+    </div>
+
+    <div id="refBanner" class="ref-banner">
+      <div class="ref-banner-text">Loading saved reference data…</div>
+    </div>
+
+    <div id="refUploaders" style="display:none">
+      <p class="hint" style="margin-bottom:10px">
+        Upload your Product / Location / Unit reference sheets. They're parsed and saved to your browser
+        so you don't need to re-upload them next time. They stay until you replace them with newer versions.
+      </p>
+      <div class="ref-uploaders">
+        <div class="field">
+          <label>Product ID sheet</label>
+          <input type="file" id="productFile" accept=".xlsx,.xls,.csv" onchange="loadRef('product', this.files[0])">
+          <div class="ref-uploader-status" id="productFileStatus">—</div>
+        </div>
+        <div class="field">
+          <label>Country / Location ID sheet</label>
+          <input type="file" id="locationFile" accept=".xlsx,.xls,.csv" onchange="loadRef('location', this.files[0])">
+          <div class="ref-uploader-status" id="locationFileStatus">—</div>
+        </div>
+        <div class="field">
+          <label>Unit ID sheet</label>
+          <input type="file" id="unitFile" accept=".xlsx,.xls,.csv" onchange="loadRef('unit', this.files[0])">
+          <div class="ref-uploader-status" id="unitFileStatus">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════ PASTE DATA (Step 2) ═════════ -->
+  <div class="card">
+    <div class="section-head">
+      <span class="num">02</span>
+      <h2>Paste Your Data</h2>
+      <span class="sub">2 Columns · Date + Price</span>
+    </div>
+
+    <p class="hint" style="margin-bottom:10px">
+      Copy two columns from your Excel/Google Sheet (date in column 1, price in column 2) and paste below.
+      Tab-separated (Excel default), comma-separated, or pipe-separated all work.
+    </p>
+
+    <div class="example-block">
+      <b>Example — what to paste:</b>
+      <code>01-01-2025	1215.55
+02-01-2025	1223.89
+05-01-2025	1211.88
+06-01-2025	1210.45
+07-01-2025	1220.11</code>
+      <div style="margin-top:6px;font-size:10.5px;color:var(--ink3)">
+        Dates can be DD-MM-YYYY, DD/MM/YYYY, YYYY-MM-DD, or "1 Jan 2025".
+        Prices can include commas as thousands separators (e.g. 1,215.55).
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Paste here</label>
+      <textarea id="pasteData" placeholder="01-01-2025&#9;1215.55&#10;02-01-2025&#9;1223.89&#10;..."></textarea>
+      <div id="parseStatus">—</div>
+    </div>
+  </div>
+
+  <!-- ═════════ ID FILTERS (Step 3) ═════════ -->
+  <div class="card">
+    <div class="section-head">
+      <span class="num">03</span>
+      <h2>Identify the Product</h2>
+      <span class="sub">3 Searchable Filters</span>
+    </div>
+
+    <p class="hint" style="margin-bottom:14px">
+      Type to search each list. The matched id is shown next to the field — those ids will be written into every row of the output.
+    </p>
+
+    <div class="row-3">
+      <div class="field">
+        <label>Location <span style="color:var(--ink3);font-weight:400">— country or region</span></label>
+        <div class="combo">
+          <div class="combo-input-wrap">
+            <input type="text" id="locationInput" placeholder="e.g. India" autocomplete="off">
+            <span class="id-tag" id="locationIdTag" style="display:none"></span>
+          </div>
+          <div class="combo-list" id="locationList"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Product</label>
+        <div class="combo">
+          <div class="combo-input-wrap">
+            <input type="text" id="productInput" placeholder="e.g. Palm Oil" autocomplete="off">
+            <span class="id-tag" id="productIdTag" style="display:none"></span>
+          </div>
+          <div class="combo-list" id="productList"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Unit <span style="color:var(--ink3);font-weight:400">— USD/MT, EUR/Kg, etc.</span></label>
+        <div class="combo">
+          <div class="combo-input-wrap">
+            <input type="text" id="unitInput" placeholder="e.g. USD/MT" autocomplete="off">
+            <span class="id-tag" id="unitIdTag" style="display:none"></span>
+          </div>
+          <div class="combo-list" id="unitList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════ PREVIEW & DOWNLOAD (Step 4) ═════════ -->
+  <div class="card">
+    <div class="section-head">
+      <span class="num">04</span>
+      <h2>Preview &amp; Download</h2>
+      <span class="sub">5-Column Output</span>
+    </div>
+
+    <div class="actions" style="margin-top:0;margin-bottom:12px">
+      <button class="primary" onclick="buildPreview()">Build preview</button>
+      <button class="secondary" onclick="clearAll()">Clear form</button>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <div class="footer">
+    <div class="privacy">🔒 100% private · Files never leave your browser · Reference sheets saved locally to this browser only</div>
+    <div style="margin-top:6px;">Part of the Procurement Resource toolkit · Designed by Deepak Sharma · Built with AI</div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE & PERSISTENCE
+// ═══════════════════════════════════════════════════════════════════════════
+// Reference data is stored in localStorage under a single key per sheet.
+// Shape of each entry:
+//   { items: [{id, name}], headerName, headerId, uploadedAt: <ms> }
+//
+// Why localStorage and not IndexedDB?
+//   Typical reference sheets fit comfortably under ~3 MB once parsed. If a
+//   user's sheet ever overflows the ~5 MB quota, we catch the QuotaExceeded
+//   exception and warn — they can still use the tool, just without persistence.
+
+const STORAGE_KEY = {
+  product: 'pr:quick-price-upload:product',
+  location: 'pr:quick-price-upload:location',
+  unit: 'pr:quick-price-upload:unit',
+};
+
+const state = {
+  product:  null,   // {items, headerName, headerId, uploadedAt}
+  location: null,
+  unit:     null,
+  parsedRows: [],   // [{date, price}]
+  selected: {
+    locationId: null, locationName: '',
+    productId: null,  productName: '',
+    unitId: null,     unitName: ''
+  }
+};
+
+function loadFromStorage(kind) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY[kind]);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed.items) ? parsed : null;
+  } catch (_) { return null; }
+}
+
+function saveToStorage(kind, data) {
+  try {
+    localStorage.setItem(STORAGE_KEY[kind], JSON.stringify(data));
+    return true;
+  } catch (e) {
+    console.warn('Storage quota exceeded for', kind, e);
+    return false;
+  }
+}
+
+function clearStorage(kind) {
+  if (kind) {
+    localStorage.removeItem(STORAGE_KEY[kind]);
+  } else {
+    Object.values(STORAGE_KEY).forEach(k => localStorage.removeItem(k));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REFERENCE SHEET LOADING — timezone-safe Excel reading
+// ═══════════════════════════════════════════════════════════════════════════
+async function readSheet(file) {
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, {type: 'array', cellDates: false, cellNF: true});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if (!ws || !ws['!ref']) return [];
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const rows = [];
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    const row = [];
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cell = ws[XLSX.utils.encode_cell({r: R, c: C})];
+      row.push(cell ? cell.v : '');
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+// Figure out which column is the ID and which is the name.
+//
+// This is trickier than it looks because IMARC sheets often have headers
+// like "Country Id" and "Country Name" — both contain "country". Just
+// regex-matching on the header text would tag both columns as the name
+// column. Approach:
+//   1. Score each column on its header for being ID-like (digits-only,
+//      contains 'id'/'code'/'key', shorter, mostly small integers)
+//   2. Score each column on its data for ID-ness (purely numeric values
+//      tend to be IDs; long descriptive text tends to be names)
+//   3. Pick the column with the highest combined ID-score as the ID col,
+//      the other as the name col.
+//
+// This way "Country Id | Country Name" works correctly: column 0's data
+// is all small integers, column 1's data is country names → unambiguous.
+function detectColumns(rows) {
+  if (!rows.length || !rows[0]) return {idCol: 0, nameCol: 1, headerId: 'Id', headerName: 'Name'};
+  const head = rows[0].map(v => String(v ?? '').trim());
+  const numCols = head.length;
+  if (numCols < 2) return {idCol: 0, nameCol: 1, headerId: head[0] || 'Id', headerName: 'Name'};
+
+  // Sample up to 50 data rows to score each column
+  const sample = rows.slice(1, 51);
+  const colScores = head.map((h, ci) => {
+    let idHeaderScore = 0;
+    const hl = h.toLowerCase();
+    // Header hints — ID-like
+    if (/\bid\b/.test(hl) || /\bcode\b/.test(hl) || /\bkey\b/.test(hl)) idHeaderScore += 3;
+    if (/^id$/i.test(hl)) idHeaderScore += 5;  // bare "id" is a strong signal
+    // Header hints — NAME-like (subtract from idHeaderScore)
+    if (/\b(name|description|label|title)\b/.test(hl)) idHeaderScore -= 3;
+
+    // Data hints
+    let numericCount = 0, totalChars = 0, sampleN = 0;
+    for (const row of sample) {
+      const v = row[ci];
+      if (v === undefined || v === null || v === '') continue;
+      sampleN++;
+      const s = String(v).trim();
+      totalChars += s.length;
+      if (/^-?\d+(\.\d+)?$/.test(s)) numericCount++;
+    }
+    const numericRatio = sampleN > 0 ? numericCount / sampleN : 0;
+    const avgLen = sampleN > 0 ? totalChars / sampleN : 0;
+    // Mostly-numeric columns score as IDs; long-text columns score as names
+    const dataScore = numericRatio * 5 - (avgLen > 8 ? 2 : 0);
+
+    return {ci, header: h, idScore: idHeaderScore + dataScore, numericRatio, avgLen};
+  });
+
+  // Pick the column with the highest ID score
+  colScores.sort((a, b) => b.idScore - a.idScore);
+  const idCol = colScores[0].ci;
+  // Name col is whichever column has the lowest ID score (= most name-like)
+  // among the remaining columns. For 2-col sheets, that's just the other one.
+  const nameCol = colScores.slice(1).sort((a, b) => a.idScore - b.idScore)[0].ci;
+
+  return {
+    idCol,
+    nameCol,
+    headerId:   head[idCol]   || 'Id',
+    headerName: head[nameCol] || 'Name'
+  };
+}
+
+async function loadRef(kind, file) {
+  if (!file) return;
+  const statusEl = document.getElementById(kind + 'FileStatus');
+  statusEl.textContent = 'Reading…';
+  statusEl.className = 'ref-uploader-status';
+  try {
+    const rows = await readSheet(file);
+    if (rows.length < 2) { throw new Error('Sheet has no data rows'); }
+    const det = detectColumns(rows);
+    state['_' + kind + 'LastRows'] = rows;
+    state['_' + kind + 'Det'] = det;
+    finalizeRefLoad(kind, rows, det);
+  } catch (e) {
+    statusEl.textContent = '✗ ' + e.message;
+    statusEl.className = 'ref-uploader-status err';
+  }
+}
+
+function finalizeRefLoad(kind, rows, det) {
+  const statusEl = document.getElementById(kind + 'FileStatus');
+  const items = [];
+  for (let i = 1; i < rows.length; i++) {
+    const name = String(rows[i][det.nameCol] ?? '').trim();
+    const id = String(rows[i][det.idCol] ?? '').trim();
+    if (name && id) items.push({id, name});
+  }
+  if (items.length === 0) {
+    statusEl.textContent = '✗ No id/name pairs found. Try clicking "swap" to flip columns.';
+    statusEl.className = 'ref-uploader-status err';
+    statusEl.innerHTML += ` <a href="#" onclick="swapRefCols('${kind}'); return false;" style="color:var(--accent2);text-decoration:underline">swap</a>`;
+    return;
+  }
+  const data = {items, headerName: det.headerName, headerId: det.headerId, uploadedAt: Date.now()};
+  const saved = saveToStorage(kind, data);
+  state[kind] = data;
+  statusEl.innerHTML = `<span class="ok">✓ ${items.length} loaded</span> ` +
+    `<span style="color:var(--ink3)">(${escapeHtml(det.headerId)} → ${escapeHtml(det.headerName)})</span> ` +
+    `<a href="#" onclick="swapRefCols('${kind}'); return false;" style="color:var(--accent2);text-decoration:underline;margin-left:6px">swap?</a>` +
+    (saved ? '' : ' · <span style="color:var(--gold)">not saved (storage full)</span>');
+  statusEl.className = 'ref-uploader-status';
+  renderRefBanner();
+}
+
+function swapRefCols(kind) {
+  const rows = state['_' + kind + 'LastRows'];
+  const det = state['_' + kind + 'Det'];
+  if (!rows || !det) return;
+  const swapped = {
+    idCol: det.nameCol,
+    nameCol: det.idCol,
+    headerId: det.headerName,
+    headerName: det.headerId
+  };
+  state['_' + kind + 'Det'] = swapped;
+  finalizeRefLoad(kind, rows, swapped);
+}
+
+function forgetAllRef() {
+  if (!confirm('Forget all saved reference sheets? You\'ll need to re-upload them.')) return;
+  clearStorage();
+  state.product = state.location = state.unit = null;
+  renderRefBanner();
+  ['product','location','unit'].forEach(k => {
+    const inp = document.getElementById(k + 'File');
+    if (inp) inp.value = '';
+    const st = document.getElementById(k + 'FileStatus');
+    if (st) { st.textContent = '—'; st.className = 'ref-uploader-status'; }
+  });
+}
+
+function showRefUploaders(show) {
+  document.getElementById('refUploaders').style.display = show ? '' : 'none';
+}
+
+function timeSince(ms) {
+  if (!ms) return '—';
+  const diff = Date.now() - ms;
+  const sec = Math.floor(diff/1000);
+  if (sec < 60) return 'just now';
+  const min = Math.floor(sec/60);
+  if (min < 60) return min + ' min ago';
+  const hr = Math.floor(min/60);
+  if (hr < 24) return hr + ' hr ago';
+  const day = Math.floor(hr/24);
+  if (day < 30) return day + (day === 1 ? ' day ago' : ' days ago');
+  const mo = Math.floor(day/30);
+  if (mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
+  return new Date(ms).toLocaleDateString();
+}
+
+function renderRefBanner() {
+  const banner = document.getElementById('refBanner');
+  const counts = {
+    product:  state.product  ? state.product.items.length  : 0,
+    location: state.location ? state.location.items.length : 0,
+    unit:     state.unit     ? state.unit.items.length     : 0
+  };
+  const haveAll = state.product && state.location && state.unit;
+  const haveSome = state.product || state.location || state.unit;
+  const isExpanded = document.getElementById('refUploaders').style.display !== 'none';
+
+  if (haveAll) {
+    // Newest upload time among the three
+    const newest = Math.max(state.product.uploadedAt, state.location.uploadedAt, state.unit.uploadedAt);
+    banner.className = 'ref-banner';
+    banner.innerHTML = `
+      <div class="ref-banner-text">
+        ✓ Reference sheets loaded —
+        <b>${counts.product}</b> products,
+        <b>${counts.location}</b> locations,
+        <b>${counts.unit}</b> units.
+        Last updated <b>${timeSince(newest)}</b>.
+      </div>
+      <div class="ref-banner-actions">
+        <button class="secondary" onclick="showRefUploaders(${!isExpanded})">${isExpanded ? 'Hide uploaders' : 'Replace / upload new'}</button>
+        <button class="secondary" onclick="forgetAllRef()">Forget all</button>
+      </div>`;
+  } else if (haveSome) {
+    banner.className = 'ref-banner warn';
+    const missing = [];
+    if (!state.product)  missing.push('Product');
+    if (!state.location) missing.push('Location');
+    if (!state.unit)     missing.push('Unit');
+    banner.innerHTML = `
+      <div class="ref-banner-text">
+        ⚠ Some reference data is missing:
+        <b>${missing.join(', ')}</b> sheet${missing.length>1?'s':''} not loaded.
+        Upload below to complete setup.
+      </div>
+      <div class="ref-banner-actions">
+        <button class="secondary" onclick="forgetAllRef()">Forget all</button>
+      </div>`;
+    showRefUploaders(true);
+  } else {
+    banner.className = 'ref-banner err';
+    banner.innerHTML = `
+      <div class="ref-banner-text">
+        No reference sheets uploaded yet. Upload <b>Product</b>, <b>Location</b>, and <b>Unit</b> sheets below
+        — they're saved to this browser and reused on every visit.
+      </div>`;
+    showRefUploaders(true);
+  }
+
+  refreshCombos();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SEARCHABLE COMBO BOXES
+// ═══════════════════════════════════════════════════════════════════════════
+const combos = [
+  {input:'locationInput', list:'locationList', tag:'locationIdTag', kind:'location', selectedKey:'location'},
+  {input:'productInput',  list:'productList',  tag:'productIdTag',  kind:'product',  selectedKey:'product'},
+  {input:'unitInput',     list:'unitList',     tag:'unitIdTag',     kind:'unit',     selectedKey:'unit'},
+];
+
+function refreshCombos() {
+  combos.forEach(c => renderComboList(c));
+}
+
+function getComboItems(kind) {
+  return state[kind] ? state[kind].items : [];
+}
+
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Show full price precision without scientific notation.
+// JavaScript's String(1e-7) returns "1e-7" which looks broken in a UI.
+// For typical price ranges (1e-6 to 1e21), we use toPrecision(15) and
+// trim trailing zeros / unnecessary decimal point so 1215.55 stays "1215.55"
+// and 1.000000001 stays "1.000000001".
+function formatPriceFull(v) {
+  if (v === null || v === undefined || v === '') return '';
+  if (typeof v !== 'number') return String(v);
+  if (!Number.isFinite(v)) return String(v);
+  // For very small numbers, toString() returns scientific notation. Use
+  // toFixed with enough digits then strip trailing zeros.
+  let s = v.toString();
+  if (s.includes('e') || s.includes('E')) {
+    // Force decimal notation
+    s = v.toFixed(20).replace(/\.?0+$/, '');
+  }
+  return s;
+}
+
+function renderComboList(combo, query = '') {
+  const list = document.getElementById(combo.list);
+  const items = getComboItems(combo.kind);
+  if (items.length === 0) {
+    list.innerHTML = '<div class="combo-list-empty">Upload the reference sheet above</div>';
+    return;
+  }
+  const q = query.trim().toLowerCase();
+  let matched = items;
+  if (q) {
+    matched = items.filter(it => it.name.toLowerCase().includes(q) || it.id.toLowerCase().includes(q));
+    // Rank: startsWith first, then includes
+    matched.sort((a, b) => {
+      const aStart = a.name.toLowerCase().startsWith(q) ? 0 : 1;
+      const bStart = b.name.toLowerCase().startsWith(q) ? 0 : 1;
+      if (aStart !== bStart) return aStart - bStart;
+      return a.name.localeCompare(b.name);
+    });
+  }
+  const shown = matched.slice(0, 50); // cap for perf
+  if (shown.length === 0) {
+    list.innerHTML = '<div class="combo-list-empty">No matches</div>';
+    return;
+  }
+  list.innerHTML = shown.map(it => `
+    <div class="combo-list-item" data-id="${escapeHtml(it.id)}" data-name="${escapeHtml(it.name)}">
+      <span class="name">${escapeHtml(it.name)}</span>
+      <span class="id-pill">id ${escapeHtml(it.id)}</span>
+    </div>`).join('') + (matched.length > shown.length ?
+      `<div class="combo-list-empty">… and ${matched.length - shown.length} more — refine search</div>` : '');
+  list.querySelectorAll('.combo-list-item').forEach(el => {
+    el.addEventListener('mousedown', (e) => {
+      // mousedown (not click) so it fires before the input's blur
+      e.preventDefault();
+      selectComboItem(combo, el.dataset.id, el.dataset.name);
+    });
+  });
+}
+
+function selectComboItem(combo, id, name) {
+  state.selected[combo.selectedKey + 'Id'] = id;
+  state.selected[combo.selectedKey + 'Name'] = name;
+  document.getElementById(combo.input).value = name;
+  const tag = document.getElementById(combo.tag);
+  tag.style.display = '';
+  tag.classList.remove('missing');
+  tag.textContent = 'id ' + id;
+  document.getElementById(combo.list).classList.remove('show');
+}
+
+function clearComboSelection(combo) {
+  state.selected[combo.selectedKey + 'Id'] = null;
+  state.selected[combo.selectedKey + 'Name'] = '';
+  const tag = document.getElementById(combo.tag);
+  tag.style.display = 'none';
+  tag.textContent = '';
+}
+
+// Wire up the three combos
+combos.forEach(c => {
+  const input = document.getElementById(c.input);
+  const list = document.getElementById(c.list);
+  input.addEventListener('focus', () => {
+    renderComboList(c, input.value);
+    list.classList.add('show');
+  });
+  input.addEventListener('input', () => {
+    renderComboList(c, input.value);
+    list.classList.add('show');
+    // Try exact-match auto-binding (handy if user types in a known name)
+    const items = getComboItems(c.kind);
+    const exact = items.find(it => it.name.toLowerCase() === input.value.trim().toLowerCase());
+    if (exact) {
+      state.selected[c.selectedKey + 'Id'] = exact.id;
+      state.selected[c.selectedKey + 'Name'] = exact.name;
+      const tag = document.getElementById(c.tag);
+      tag.style.display = '';
+      tag.classList.remove('missing');
+      tag.textContent = 'id ' + exact.id;
+    } else {
+      clearComboSelection(c);
+    }
+  });
+  input.addEventListener('blur', () => {
+    // small delay so click on a list item can register first
+    setTimeout(() => list.classList.remove('show'), 150);
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') list.classList.remove('show');
+  });
+});
+
+// Close any open dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.combo')) {
+    document.querySelectorAll('.combo-list').forEach(l => l.classList.remove('show'));
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PASTE PARSING
+// ═══════════════════════════════════════════════════════════════════════════
+function parseFlexibleDateString(s) {
+  s = String(s).trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  if (m) return {__excelDate: true, d: +m[1], m: +m[2], y: +m[3]};
+  m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+  if (m) return {__excelDate: true, y: +m[1], m: +m[2], d: +m[3]};
+  const d = new Date(s);
+  if (!isNaN(d.getTime()) && /\d{4}/.test(s)) {
+    return {__excelDate: true, y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate()};
+  }
+  if (/^\d+(\.\d+)?$/.test(s)) {
+    const num = Number(s);
+    if (num > 25569 && num < 80000 && XLSX.SSF && XLSX.SSF.parse_date_code) {
+      try {
+        const dc = XLSX.SSF.parse_date_code(num);
+        if (dc && dc.y && dc.m) return {__excelDate: true, y: dc.y, m: dc.m, d: dc.d};
+      } catch (_) {}
+    }
+  }
+  return null;
+}
+
+function parsePaste(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [], skipped = [];
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i].trim();
+    if (!raw) continue;
+    let parts = raw.split('\t');
+    if (parts.length < 2) parts = raw.split(/ {2,}/);
+    if (parts.length < 2) parts = raw.split(',');
+    if (parts.length < 2) parts = raw.split('|');
+    if (parts.length < 2) { skipped.push({line: i+1, reason: 'no separator'}); continue; }
+    const dateStr = parts[0].trim();
+    const priceStr = parts[1].trim().replace(/,/g, '');
+    if (!dateStr || !priceStr) { skipped.push({line: i+1, reason: 'empty cell'}); continue; }
+    const priceNum = Number(priceStr);
+    if (!Number.isFinite(priceNum)) { skipped.push({line: i+1, reason: 'non-numeric price: ' + priceStr}); continue; }
+    const date = parseFlexibleDateString(dateStr);
+    if (!date) { skipped.push({line: i+1, reason: 'unparseable date: ' + dateStr}); continue; }
+    out.push({date, price: priceNum});
+  }
+  return {rows: out, skipped};
+}
+
+document.getElementById('pasteData').addEventListener('input', () => {
+  const text = document.getElementById('pasteData').value;
+  const statusEl = document.getElementById('parseStatus');
+  if (!text.trim()) { statusEl.textContent = '—'; state.parsedRows = []; return; }
+  const {rows, skipped} = parsePaste(text);
+  state.parsedRows = rows;
+  if (rows.length === 0) {
+    statusEl.innerHTML = `<span style="color:var(--accent)">No rows parsed${skipped.length ? ` — ${skipped.length} line${skipped.length>1?'s':''} skipped` : ''}.</span>`;
+  } else {
+    statusEl.innerHTML = `<span style="color:var(--green)">✓ ${rows.length} row${rows.length>1?'s':''} parsed</span>` +
+      (skipped.length ? ` <span style="color:var(--gold)">· ${skipped.length} skipped</span>` : '');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATE / EXCEL HELPERS (same approach as the full Price Upload tool — keeps
+// timezone shifts out of the output by using UTC math for serials)
+// ═══════════════════════════════════════════════════════════════════════════
+function ymdToExcelSerial(y, m, d) {
+  if (!y || !m || !d) return null;
+  const utc = Date.UTC(y, m - 1, d);
+  const epoch = Date.UTC(1899, 11, 30);
+  return Math.round((utc - epoch) / 86400000);
+}
+
+function formatDateForDisplay(date) {
+  if (date && typeof date === 'object' && date.__excelDate) {
+    return `${String(date.d).padStart(2,'0')}-${String(date.m).padStart(2,'0')}-${date.y}`;
+  }
+  return String(date);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUILD PREVIEW + DOWNLOAD
+// ═══════════════════════════════════════════════════════════════════════════
+function buildPreview() {
+  const results = document.getElementById('results');
+  results.innerHTML = '';
+
+  // Validate
+  if (state.parsedRows.length === 0) {
+    results.innerHTML = '<div class="alert err">Paste at least one valid date + price row above (Step 2).</div>';
+    return;
+  }
+  const missing = [];
+  if (!state.selected.locationId) missing.push('Location');
+  if (!state.selected.productId)  missing.push('Product');
+  if (!state.selected.unitId)     missing.push('Unit');
+  if (missing.length) {
+    results.innerHTML = `<div class="alert err">Pick a ${missing.join(', ')} from the searchable dropdowns above (Step 3).</div>`;
+    return;
+  }
+
+  // Build the 5-column rows
+  const rows = state.parsedRows.map(r => ({
+    'Product Id':  state.selected.productId,
+    'Location Id': state.selected.locationId,
+    'Price':       r.price,
+    'Date':        formatDateForDisplay(r.date),
+    'unit id':     state.selected.unitId,
+    _DateSerial:   ymdToExcelSerial(r.date.y, r.date.m, r.date.d)
+  }));
+
+  // Render preview
+  let html = `<div class="summary-row">
+    <div class="summary-pill"><b>${rows.length}</b> rows</div>
+    <div class="summary-pill">Product: <b>${escapeHtml(state.selected.productName)}</b> (id ${escapeHtml(state.selected.productId)})</div>
+    <div class="summary-pill">Location: <b>${escapeHtml(state.selected.locationName)}</b> (id ${escapeHtml(state.selected.locationId)})</div>
+    <div class="summary-pill">Unit: <b>${escapeHtml(state.selected.unitName)}</b> (id ${escapeHtml(state.selected.unitId)})</div>
+  </div>`;
+
+  const preview = rows.slice(0, 15);
+  html += `<div class="preview-wrap"><table>
+    <thead><tr><th>Product Id</th><th>Location Id</th><th>Price</th><th>Date</th><th>unit id</th></tr></thead>
+    <tbody>
+      ${preview.map(r => `<tr>
+        <td>${escapeHtml(r['Product Id'])}</td>
+        <td>${escapeHtml(r['Location Id'])}</td>
+        <td>${escapeHtml(formatPriceFull(r['Price']))}</td>
+        <td>${escapeHtml(r['Date'])}</td>
+        <td>${escapeHtml(r['unit id'])}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+  if (rows.length > 15) html += `<p class="hint" style="margin-top:6px">Showing first 15 of ${rows.length} rows.</p>`;
+
+  html += `<div class="actions">
+    <button class="primary" onclick="downloadXLSX()">📄 Download XLSX</button>
+    <button class="secondary" onclick="downloadCSV()">Download CSV</button>
+  </div>`;
+
+  results.innerHTML = html;
+  state._builtRows = rows;
+}
+
+function buildSheetWithRealDates(rows) {
+  // Strip the _DateSerial sentinel before json_to_sheet — the column
+  // should be rewritten as a numeric date cell after.
+  const stripped = rows.map(r => {
+    const {_DateSerial, ...rest} = r;
+    return rest;
+  });
+  const ws = XLSX.utils.json_to_sheet(stripped, {
+    header: ['Product Id', 'Location Id', 'Price', 'Date', 'unit id']
+  });
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  // Find column indexes by header
+  const colIdx = {date: -1, productId: -1, locationId: -1, unitId: -1, price: -1};
+  for (let C = range.s.c; C <= range.e.c; C++) {
+    const h = ws[XLSX.utils.encode_cell({r:0, c:C})];
+    if (!h) continue;
+    if (h.v === 'Date')        colIdx.date = C;
+    if (h.v === 'Product Id')  colIdx.productId = C;
+    if (h.v === 'Location Id') colIdx.locationId = C;
+    if (h.v === 'unit id')     colIdx.unitId = C;
+    if (h.v === 'Price')       colIdx.price = C;
+  }
+  function maybeNumeric(R, C) {
+    if (C < 0) return;
+    const ref = XLSX.utils.encode_cell({r:R, c:C});
+    const cell = ws[ref];
+    if (!cell) return;
+    if (cell.t === 'n') return;
+    const s = String(cell.v).trim();
+    if (!/^-?\d+(\.\d+)?$/.test(s)) return;
+    ws[ref] = {t:'n', v: Number(s)};
+  }
+  for (let R = 1; R <= range.e.r; R++) {
+    if (colIdx.date >= 0) {
+      const ser = rows[R-1] && rows[R-1]._DateSerial;
+      if (typeof ser === 'number' && ser > 0) {
+        ws[XLSX.utils.encode_cell({r:R, c:colIdx.date})] = {t:'n', v:ser, z:'dd-mm-yyyy'};
+      }
+    }
+    maybeNumeric(R, colIdx.productId);
+    maybeNumeric(R, colIdx.locationId);
+    maybeNumeric(R, colIdx.unitId);
+    maybeNumeric(R, colIdx.price);
+  }
+  if (!ws['!cols']) ws['!cols'] = [];
+  if (colIdx.productId  >= 0) ws['!cols'][colIdx.productId]  = {wch: 11};
+  if (colIdx.locationId >= 0) ws['!cols'][colIdx.locationId] = {wch: 11};
+  if (colIdx.price      >= 0) ws['!cols'][colIdx.price]      = {wch: 18};
+  if (colIdx.date       >= 0) ws['!cols'][colIdx.date]       = {wch: 12};
+  if (colIdx.unitId     >= 0) ws['!cols'][colIdx.unitId]     = {wch: 9};
+
+  // ── Apply a no-rounding number format to every Price cell ────────────
+  // For values with decimals: use "0.############" so Excel shows every
+  // digit it stored (up to 12 decimal places), preventing the default
+  // "General" format from auto-rounding long decimals like 1223.891202303042
+  // down to 1223.891202.
+  // For whole-number prices (rare in commodity data, but possible): keep
+  // "General" so they display cleanly as "100" instead of "100." with a
+  // trailing decimal point.
+  if (colIdx.price >= 0) {
+    for (let R = 1; R <= range.e.r; R++) {
+      const ref = XLSX.utils.encode_cell({r: R, c: colIdx.price});
+      const cell = ws[ref];
+      if (cell && cell.t === 'n' && Number.isFinite(cell.v)) {
+        cell.z = (cell.v % 1 === 0) ? 'General' : '0.############';
+      }
+    }
+  }
+  return ws;
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadXLSX() {
+  if (!state._builtRows || state._builtRows.length === 0) { alert('Build the preview first.'); return; }
+  const wb = XLSX.utils.book_new();
+  const ws = buildSheetWithRealDates(state._builtRows);
+  const sheetName = (state.selected.productName || 'Upload').slice(0, 30).replace(/[\\/?*[\]]/g,'');
+  XLSX.utils.book_append_sheet(wb, ws, sheetName || 'Upload');
+  const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  const blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  triggerDownload(blob, `${sheetName || 'quick-upload'}.xlsx`);
+}
+
+function downloadCSV() {
+  if (!state._builtRows || state._builtRows.length === 0) { alert('Build the preview first.'); return; }
+  const stripped = state._builtRows.map(r => { const {_DateSerial, ...rest} = r; return rest; });
+  const ws = XLSX.utils.json_to_sheet(stripped, {header: ['Product Id','Location Id','Price','Date','unit id']});
+  const csv = XLSX.utils.sheet_to_csv(ws);
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  triggerDownload(blob, `${(state.selected.productName || 'quick-upload').slice(0,30)}.csv`);
+}
+
+function clearAll() {
+  document.getElementById('pasteData').value = '';
+  document.getElementById('parseStatus').textContent = '—';
+  state.parsedRows = [];
+  combos.forEach(c => {
+    document.getElementById(c.input).value = '';
+    clearComboSelection(c);
+  });
+  document.getElementById('results').innerHTML = '';
+  state._builtRows = null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════════════════
+function init() {
+  state.product  = loadFromStorage('product');
+  state.location = loadFromStorage('location');
+  state.unit     = loadFromStorage('unit');
+  renderRefBanner();
+}
+init();
+</script>
+</body>
+</html>
